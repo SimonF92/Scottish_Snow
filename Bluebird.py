@@ -40,8 +40,17 @@ year_range=[2017,2018,2019,2020]
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.07445012102833&lng=-3.5009980223549064&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-30&atmFilter=&showDates=false'
 #snowpatch_name='Gael_Charn'
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.84103107673674&lng=-4.491527081409004&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2019-11-01%7C2020-05-30&atmFilter=&showDates=false'
-snowpatch_name='An_Riabhachan'
-url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.36876671642763&lng=-5.095174310845323&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
+#snowpatch_name='An_Riabhachan'
+#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.36876671642763&lng=-5.095174310845323&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
+#snowpatch_name='An_Stuc'
+#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.56194982435603&lng=-4.21819925395539&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
+#snowpatch_name='Beinn_Mhanach'
+#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.535851327970605&lng=-4.645657540240791&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=97&gain=1.0&gamma=1.0&time=2019-11-01%7C2020-05-05&atmFilter=&showDates=false'
+#snowpatch_name='Coire_Cruach_Sneachda'
+#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.64077849723661&lng=-4.16107177734375&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=97&gain=1.0&gamma=1.0&time=2019-11-01%7C2020-05-05&atmFilter=&showDates=false'
+snowpatch_name='Carn_na_Caim'
+url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.90397803853171&lng=-4.191913605609443&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=100&gain=1.3&gamma=0.7&time=2018-12-01%7C2019-06-27&atmFilter=&showDates=false'
+
 
 x=url.split('=')
 lat=x[2]
@@ -101,7 +110,7 @@ for year in year_range:
    
     
     
-    '''
+    
     
 
     dates=[]
@@ -140,7 +149,7 @@ for year in year_range:
     
       
     
-
+    
 
     directory = directory
 
@@ -157,8 +166,8 @@ for year in year_range:
             pass
 
    
-    '''
-
+    
+    
 
     directory = cropped_directory
 
@@ -286,7 +295,27 @@ for year in year_range:
     df['day'] = pd.DatetimeIndex(df["Datetime"]).day
     df['daymonth'] = df['Dates'].str[5:]
     df['Snowpatch']=snowpatch_name
-    df['Approximate Area (m^2)']=np.sqrt(df['Areas']/1.15)
+    #df['Approximate Area (m^2)']=np.sqrt(df['Areas']/1.15)
+    
+    ##################################---Logic---#####################################
+    
+    #1.15pixel = 1m
+    #pixel length (m) = 1/1.15 
+    #= 0.8695
+    #pixel has both x and y dimension (is a square)
+    #pixel area (m^2)
+    #= 0.8695 ^ 2
+    #= 0.756 m^2
+    #opencv image mask calculates a polygon of 
+    #snowpatch and returns total pixel count in polygon 
+    #(ie 10,000 pixels)
+    #snowpatch area (m^2)
+    #= 10,000 * 0.756
+    #= 7560 m^2
+    
+    ##################################---Logic---######################################
+    
+    df['Approximate Area (m^2)']=(df['Areas'] * 0.756)
 
     d0 = date(year, 4, 1)
 
@@ -334,6 +363,13 @@ for year in year_range:
     extrapolated=extrapolated.where(extrapolated['Diff']<0)
     extrapolated=extrapolated.dropna()    
     extrapolated=pd.concat([correction,extrapolated])
+    
+    
+    extrapolated_2= extrapolated.where(extrapolated['Delta']>30)
+    extrapolated_2=extrapolated_2.dropna()
+    
+    yaxis_2=extrapolated_2['Areas']
+    xaxis_2=extrapolated_2['Delta']
 
 
     
@@ -341,7 +377,7 @@ for year in year_range:
     yearly_area=trapz(yaxis,xaxis)
     area_under_curve.append(yearly_area)
     
-    yearly_area_2=simps(yaxis,xaxis)
+    yearly_area_2=simps(yaxis_2,xaxis_2)
     area_under_curve2.append(yearly_area_2)
     
     
@@ -394,7 +430,7 @@ ax = sns.scatterplot(x="Delta", y='Approximate Area (m^2)', data=final,hue="year
 ax.set_xticks([0,30,60,90,120,150])
 ax.set_xticklabels(['April','May','June','July','August','September'])
 
-ax.set(xlabel='Month (Spring-Summer)', ylabel='Approximate Area (m^2)')
+ax.set(xlabel='Month (Spring-Summer)', ylabel='Approximate Area (m$^2$)')
 
 plt.title(coords,fontsize=12)
 plt.suptitle(snowpatch_name, fontsize=20)
@@ -402,4 +438,3 @@ plt.suptitle(snowpatch_name, fontsize=20)
 
 plt.savefig(snowpatch_name + '/Bluebird/' +snowpatch_name + '.png')
         
-   
