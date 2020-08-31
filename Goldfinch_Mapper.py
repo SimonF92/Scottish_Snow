@@ -11,7 +11,8 @@ lat=[56.952699946355196,
     57.36876671642763,
     56.56194982435603,
      56.535851327970605,
-     56.64077849723661
+     56.64077849723661,
+     56.90397803853171
     ]
 lon=[-4.57494735455839,
      -3.665306567272637,
@@ -22,7 +23,8 @@ lon=[-4.57494735455839,
      -5.095174310845323,
     -4.21819925395539,
     -4.645657540240791,
-     -4.16107177734375
+     -4.16107177734375,
+     -4.191913605609443
     ]
 name=['Creag_Meagaidh',
       'Coire_Domhain',
@@ -33,7 +35,8 @@ name=['Creag_Meagaidh',
      'An_Riabhachan',
      'An_Stuc',
      'Beinn_Mhanach',
-      'Coire_Cruach_Sneachda'
+      'Coire_Cruach_Sneachda',
+      'Carn_na_Caim'
      ]
 
 size2020=[3.415,
@@ -45,7 +48,8 @@ size2020=[3.415,
      4.22,
      1.09,
       2.28,
-    2.83]
+    2.83,
+         1.18]
 size2017=[1.52,
      1.11,
      0.578,
@@ -55,7 +59,8 @@ size2017=[1.52,
      0.89,
      0.022,
       0.16,
-         0.189]
+         0.189,
+         0.0122]
 size2018=[2.13,
      1.59,
      1.79,
@@ -65,7 +70,8 @@ size2018=[2.13,
      2.84,
      0.28,
       1.69,
-         1.52]
+         1.52,
+         1.45]
 size2019=[0.855,
      3.49,
      1.54,
@@ -75,7 +81,8 @@ size2019=[0.855,
      1.20,
      0.94,
       0.29,
-         1.33]
+         1.33,
+         0.0135]
 
 
 
@@ -101,7 +108,7 @@ n2020
 
 normtuple=[]
 
-for x in range (0,10):
+for x in range (0,11):
 
     list1= n2017[x],n2018[x],n2019[x],n2020[x]
     normlist=[float(i)/max(list1) for i in list1]
@@ -133,8 +140,8 @@ year2018=['2018','2018','2018','2018']
 year2019=['2019','2019','2019','2019']
 year2020=['2020','2020','2020','2020']
 
-latitude=[56.1394982435603,56.1394982435603,56.1394982435603,56.1394982435603]
-longitude=[-2.8200000567272637,-2.8200000567272637,-2.8200000567272637,-2.8200000567272637,]
+latitude=[57.5394982435603,57.5394982435603,57.5394982435603,57.5394982435603]
+longitude=[-2.7900000567272637,-2.7900000567272637,-2.7900000567272637,-2.7900000567272637,]
 
 yearscale = pd.DataFrame(list(zip(year2017,year2018, year2019, year2020, latitude,longitude)), 
                    columns =['Year2017','Year2018','Year2019','Year2020','Latitude', 'Longitude']) 
@@ -145,6 +152,16 @@ yearscale['Longitude_2018']=yearscale['Longitude_2019']-0.15
 yearscale['Longitude_2017']=yearscale['Longitude_2018']-0.15
 
 yearscale
+
+
+
+info=['Ratio of Melt-season (MJJASO) Snowcover (m^2) at Specific Year to Year with Maximum Coverage (2017-2020)']
+lat=[57.6194982435603]
+lon=[-2.9800000567272637]
+
+info = pd.DataFrame(list(zip(info,lat,lon)), 
+                   columns =['Info','lat','lon']) 
+
 
 
 
@@ -227,6 +244,16 @@ data_8 = go.Scattermapbox(lat=list(yearscale['Latitude']),
                         text=yearscale['Year2020'])
 
 
+
+data_9 = go.Scattermapbox(lat=list(info['lat']),
+                        lon=list(info['lon']),
+                        mode='markers+text',
+                        marker=dict(size=0.005,color='Black'),
+                        textposition='bottom center',
+                        textfont=dict(size=13, color='black'),
+                        text=info['Info'])
+
+
 layout = go.Layout(
     title='',
     width=1000,
@@ -246,6 +273,6 @@ layout = go.Layout(
 )
 
 
-fig = go.Figure(data=[data,data_2,data_3,data_4,data_5,data_6,data_7,data_8], layout=layout)
+fig = go.Figure(data=[data,data_2,data_3,data_4,data_5,data_6,data_7,data_8,data_9], layout=layout)
 fig.update_layout(showlegend=False)
 fig.show()
