@@ -3,7 +3,7 @@
 
 import os
 from datetime import timedelta, date
-#you need to have the selenium webdriver in your directory, download it from their website
+#you need to have the selenium webdriver in your directory, download it from their website- has to be in same location as this code
 from selenium import webdriver
 import time
 
