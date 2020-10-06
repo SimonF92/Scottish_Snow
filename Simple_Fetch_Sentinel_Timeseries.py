@@ -3,6 +3,7 @@
 
 import os
 from datetime import timedelta, date
+#you need to have the selenium webdriver in your directory, download it from their website
 from selenium import webdriver
 import time
 
@@ -12,7 +13,7 @@ import time
 lat=None
 lng=None
 
-
+#navigate to area of interest in sentinel playground, apply zoom of interest and define feature name below
 url="https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=69.20038412441527&lng=-49.45838928222656&zoom=11&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=20&gain=1.0&gamma=1.0&time=2020-04-01%7C2020-10-06&atmFilter=&showDates=false"
 feature_name="Jakobshavn_Glacier"
 
@@ -27,14 +28,14 @@ zoom=zoom[:2]
 
 
 
-
+#provide years you wish to capture data for
 year_range=[2017,2018,2019,2020]
 for year in year_range:
     
     
     stringyear=str(year)
     
-
+    #this creates a directory structure
     dir = os.path.join(feature_name)
     if not os.path.exists(dir):
         os.mkdir(dir)
@@ -65,7 +66,7 @@ for year in year_range:
             yield date1 + timedelta(n)
             
     from datetime import date
-
+    #here is where you define date ranges for each year (this is 1st April 2017 to 30th Sept 2017 each year)
     start_dt = date(year, 4, 1)
     end_dt = date(year, 9, 30)
     for dt in daterange(start_dt, end_dt):
@@ -94,6 +95,8 @@ for year in year_range:
 
     directory = directory
 
+    #as you can see, you will probably wish to crop the screenshots to an area of interest, do this here. To optimise your initial 
+    #setup, change the daterange so only a few images are captured and then double check the cropping is good
     for filename in os.listdir(directory):
         identity=str(filename)
         identity=identity.strip('.png')
