@@ -1,5 +1,5 @@
 #---------------------------------BLUEBIRD_Hand_Cleaned------------------------------------#
-
+#An stuc, Nevis Gullys, Coire_Cruach_Sneachda, Beinn a Burd, An riabachan
 
 import cv2
 import numpy as np
@@ -41,14 +41,14 @@ year_range=[2017,2018,2019,2020]
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.07445012102833&lng=-3.5009980223549064&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-30&atmFilter=&showDates=false'
 #snowpatch_name='Gael_Charn'
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.84103107673674&lng=-4.491527081409004&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2019-11-01%7C2020-05-30&atmFilter=&showDates=false'
-#snowpatch_name='An_Riabhachan'
-#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.36876671642763&lng=-5.095174310845323&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
+snowpatch_name='An_Riabhachan'
+url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=57.36876671642763&lng=-5.095174310845323&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
 #snowpatch_name='An_Stuc'
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.56194982435603&lng=-4.21819925395539&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=99&gain=1.3&gamma=0.7&time=2017-12-01%7C2018-06-05&atmFilter=&showDates=false'
 #snowpatch_name='Beinn_Mhanach'
 #url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.535851327970605&lng=-4.645657540240791&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=97&gain=1.0&gamma=1.0&time=2019-11-01%7C2020-05-05&atmFilter=&showDates=false'
-snowpatch_name='Coire_Cruach_Sneachda'
-url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.64077849723661&lng=-4.16107177734375&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=97&gain=1.0&gamma=1.0&time=2019-11-01%7C2020-05-05&atmFilter=&showDates=false'
+#snowpatch_name='Coire_Cruach_Sneachda'
+#url='https://apps.sentinel-hub.com/sentinel-playground/?source=S2&lat=56.64077849723661&lng=-4.16107177734375&zoom=16&preset=1-NATURAL-COLOR&layers=B01,B02,B03&maxcc=97&gain=1.0&gamma=1.0&time=2019-11-01%7C2020-05-05&atmFilter=&showDates=false'
 
 x=url.split('=')
 lat=x[2]
@@ -147,7 +147,7 @@ for year in year_range:
                 lower_range = np.array([20, 30, 0],np.uint8)
                 upper_range = np.array([90, 255,255],np.uint8)
                 mask = cv2.inRange(hsv, lower_range, upper_range)
-                #cv2.imwrite(masked_directory+identity+'.png', mask)
+                cv2.imwrite(masked_directory+identity+'.png', mask)
                 cv2.imwrite(machinelearning_directory+snowpatch_name+identity+'AI_sorted.png', img)
                 snow = cv2.countNonZero(mask)
                 areas.append(snow)
@@ -370,12 +370,58 @@ ax = sns.scatterplot(x="Delta", y='Approximate Area (m^2)', data=final,hue="year
 ax.set_xticks([0,30,60,90,120,150])
 ax.set_xticklabels(['April','May','June','July','August','September'])
 
-ax.set(xlabel='Month (Spring-Summer)', ylabel='Approximate Area (m^2)')
+ax.set(xlabel='Month (Spring-Summer)', ylabel='Approximate Area (m$^2$)')
 
 plt.title(coords,fontsize=12)
 plt.suptitle(snowpatch_name, fontsize=20)
 
 
 plt.savefig(snowpatch_name + '/Bluebird/' +snowpatch_name + '.png')
+
+
+
+
+finallog=None
+
+plt.figure(figsize=(14, 9))
+
+
+sns.set(font_scale=1.2)
+sns.set_style("ticks")
+
+finallog=final
+finallog['Approximate Area (m^2)']=finallog['Approximate Area (m^2)']+100
+
+#finallog=final.where(final['Approximate Area (m^2)'] != 0)
+#finallog=finallog.dropna(subset=['Approximate Area (m^2)'])
+
+
+
+ax = sns.lineplot(x="Delta", y='Approximate Area (m^2)', data=finallog,hue="year",legend='full', palette="deep")
+ax = sns.scatterplot(x="Delta", y='Approximate Area (m^2)', data=finallog,hue="year",legend=None, palette="deep")
+
+
+ax.set_xticks([0,30,60,90,120,150])
+ax.set_xticklabels(['April','May','June','July','August','September'])
+
+ax.set(xlabel='Month', ylabel='Approximate Area (m$^2$) (Log-Scale)')
+ax.set_yscale("log")
+locmin = mticker.LogLocator(base=10, subs=np.arange(0.1,1,0.1),numticks=10)  
+ax.yaxis.set_minor_locator(locmin)
+ax.yaxis.set_minor_formatter(mticker.NullFormatter())
+
+plt.title(coords,fontsize=12)
+plt.grid(True,which="both",ls="--",c='gray',alpha=0.3)  
+
+#ax.axhline(900, ls='--', c='red', linewidth=0.5)
+#ax.text(30,950, "Accurate Resolution", c='red',size=12)
+
+ax.axhline(100, ls='--', c='red', linewidth=0.5)
+ax.text(30,110, "Absolute Resolution", c='red',size=12)
+
+
+plt.suptitle(snowpatch_name, fontsize=20)
+
+plt.savefig(snowpatch_name + '/Bluebird/' +snowpatch_name + '_logged.png')
         
    

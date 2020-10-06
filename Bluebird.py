@@ -18,6 +18,8 @@ from sklearn import metrics
 from numpy import trapz
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
+import matplotlib.ticker as mticker
+import re
 
 lat=None
 lng=None
@@ -128,6 +130,8 @@ for year in year_range:
         dates.append(dt.strftime("%Y-%m-%d"))
 
 
+    '''   
+        
     class Patch:
 
         def __init__(self, date):
@@ -149,7 +153,7 @@ for year in year_range:
     
       
     
-    
+    '''
 
     directory = directory
 
@@ -198,16 +202,29 @@ for year in year_range:
 
 
                 img = cv2.imread(directory + filename)
+                cv2.imwrite(machinelearning_directory+snowpatch_name+identity+'AI_sorted.png', img)
 
 
-                if filename != 'Masks':
+                for filename in os.listdir(machinelearning_directory):
+                    identity=str(filename)
+                    identity=identity.strip('.png')
+                    identity=re.sub("[^0-9]", "", identity)
+            
+                    a=identity[:4]
+                    b=identity[4:6]
+                    c=identity[6:8]
+
+                    identity=str(a)+'-'+str(b)+'-'+str(c)
+                    
+                    img = cv2.imread(machinelearning_directory+filename)
+                   
 
                     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
                     lower_range = np.array([20, 30, 0],np.uint8)
                     upper_range = np.array([90, 255,255],np.uint8)
                     mask = cv2.inRange(hsv, lower_range, upper_range)
-                    #cv2.imwrite(masked_directory+identity+'.png', mask)
-                    cv2.imwrite(machinelearning_directory+snowpatch_name+identity+'AI_sorted.png', img)
+                    cv2.imwrite(masked_directory+identity+'.png', mask)
+
                     snow = cv2.countNonZero(mask)
                     areas.append(snow)
                     dates.append(identity)
@@ -225,8 +242,8 @@ for year in year_range:
                     cloudmask = cv2.inRange(hsv, lower_range, upper_range)
                     detectcloudcover= cv2.countNonZero(cloudmask)
                     #cv2.imwrite(masked_directory+identity+'_clouds.png', cloudmask)
-
-                    
+                        
+                       
 
                 else:
                     pass
@@ -344,6 +361,7 @@ for year in year_range:
     x=df['Delta'].values.tolist()
     
     y=df['Approximate Area (m^2)'].values.tolist()
+    #y[y != 0]
 
 
     model = np.poly1d(np.polyfit(x, y, 2))
@@ -437,4 +455,51 @@ plt.suptitle(snowpatch_name, fontsize=20)
 
 
 plt.savefig(snowpatch_name + '/Bluebird/' +snowpatch_name + '.png')
+
+
+#################################################################################################
+
+
+finallog=None
+
+plt.figure(figsize=(14, 9))
+
+
+sns.set(font_scale=1.2)
+sns.set_style("ticks")
+
+finallog=final
+finallog['Approximate Area (m^2)']=finallog['Approximate Area (m^2)']+100
+
+#finallog=final.where(final['Approximate Area (m^2)'] != 0)
+#finallog=finallog.dropna(subset=['Approximate Area (m^2)'])
+
+
+
+ax = sns.lineplot(x="Delta", y='Approximate Area (m^2)', data=finallog,hue="year",legend='full', palette="deep")
+ax = sns.scatterplot(x="Delta", y='Approximate Area (m^2)', data=finallog,hue="year",legend=None, palette="deep")
+
+
+ax.set_xticks([0,30,60,90,120,150])
+ax.set_xticklabels(['April','May','June','July','August','September'])
+
+ax.set(xlabel='Month', ylabel='Approximate Area (m$^2$) (Log-Scale)')
+ax.set_yscale("log")
+locmin = mticker.LogLocator(base=10, subs=np.arange(0.1,1,0.1),numticks=10)  
+ax.yaxis.set_minor_locator(locmin)
+ax.yaxis.set_minor_formatter(mticker.NullFormatter())
+
+plt.title(coords,fontsize=12)
+plt.grid(True,which="both",ls="--",c='gray',alpha=0.3)  
+
+#ax.axhline(900, ls='--', c='red', linewidth=0.5)
+#ax.text(30,950, "Accurate Resolution", c='red',size=12)
+
+ax.axhline(100, ls='--', c='red', linewidth=0.5)
+ax.text(30,110, "Absolute Resolution", c='red',size=12)
+
+
+plt.suptitle(snowpatch_name, fontsize=20)
+
+plt.savefig(snowpatch_name + '/Bluebird/' +snowpatch_name + '_logged.png')
         
